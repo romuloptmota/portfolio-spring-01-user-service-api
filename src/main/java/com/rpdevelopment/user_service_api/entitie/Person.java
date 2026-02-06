@@ -32,6 +32,13 @@ public class Person {
         this.user = user;
     }
 
+    public Person(Person entity) {
+        this.id = entity.getId();
+        this.document = entity.getDocument();
+        this.type = entity.getType();
+        this.user = entity.getUser();
+    }
+
     //Getter|Setter
     public Long getId() {
         return id;

@@ -1,0 +1,146 @@
+package com.rpdevelopment.user_service_api.service;
+
+import com.rpdevelopment.user_service_api.dto.AddressDto;
+import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
+import com.rpdevelopment.user_service_api.entitie.Address;
+import com.rpdevelopment.user_service_api.entitie.Person;
+import com.rpdevelopment.user_service_api.entitie.User;
+import com.rpdevelopment.user_service_api.exceptions.ResourceNotFoundException;
+import com.rpdevelopment.user_service_api.repository.AddressRepository;
+import com.rpdevelopment.user_service_api.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+public class UserPersonAddressService {
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AddressRepository addressRepository;
+
+    //CRUD PADRÃO
+    // FIND ALL
+    @Transactional(readOnly = true)
+    public Page<UserPersonAddressDto> usersFindAll (Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        return users.map(UserPersonAddressDto::new); }
+
+    //FIND BY ID
+    @Transactional(readOnly = true)
+    public UserPersonAddressDto usersFindById (Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Not Found"));
+        return new UserPersonAddressDto(user);
+    }
+
+    //SAVE
+    @Transactional
+    public UserPersonAddressDto save (UserPersonAddressDto userPersonAddressDto) {
+
+        User user = new User();
+        copyUserDtoToUser(userPersonAddressDto, user);
+
+        Person person = new Person();
+        copyPersonDtotoPerson(userPersonAddressDto, person);
+        user.setPerson(person);
+
+        if (userPersonAddressDto.getAddresses() != null){
+            for(AddressDto addressDto : userPersonAddressDto.getAddresses()){
+
+                Address address = new Address();
+                copyAddressDtoToAddress(addressDto, address);
+                user.addAddress(address); }
+            }
+
+        User savedUser = userRepository.save(user);
+        return new UserPersonAddressDto(savedUser); }
+
+    //UPDATE
+    @Transactional
+    public UserPersonAddressDto update(UserPersonAddressDto userPersonAddressDto, Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Not Found"));
+        copyUserDtoToUser(userPersonAddressDto, user);
+
+        Person person = user.getPerson();
+        if (person == null) {
+            person = new Person();
+        }
+        copyPersonDtotoPerson(userPersonAddressDto, person);
+        user.setPerson(person);
+
+        // limpa os endereços atuais
+        user.getAddresses().clear();
+        if (userPersonAddressDto.getAddresses() != null) {
+            for (AddressDto addressDto : userPersonAddressDto.getAddresses()) {
+
+                Address address;
+                // Se veio com ID → atualiza
+                if (addressDto.getId() != null) {
+                    address = addressRepository.getReferenceById(addressDto.getId());
+                    copyAddressDtoToAddress(addressDto, address);
+                } else {
+
+                    // Se não veio ID → verifica se já existe no banco
+                    Optional<Address> existingAddress = addressRepository.findByRoadAndNumberAndZipCodeAndCity(
+                            addressDto.getRoad(),
+                            addressDto.getNumber(),
+                            addressDto.getZipCode(),
+                            addressDto.getCity());
+                    if (existingAddress.isPresent()) {
+
+                        // reutiliza endereço existente
+                        address = existingAddress.get();
+
+                    } else {
+                        // cria novo
+                        address = new Address();
+                        copyAddressDtoToAddress(addressDto, address);
+                    }
+                }
+                user.addAddress(address);
+            }
+        }
+
+        User savedUser = userRepository.save(user);
+        return new UserPersonAddressDto(savedUser); }
+
+    //DELETE
+    @Transactional
+    public void delete (Long id) {
+
+        User user = userRepository.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Not Found"));
+        userRepository.delete(user);
+
+    }
+
+    //MÉTODOS
+    // Converte dto user para entity user
+    public void copyUserDtoToUser(UserPersonAddressDto userPersonAddressDto, User user) {
+        user.setName(userPersonAddressDto.getName());
+        user.setEmail(userPersonAddressDto.getEmail());
+        user.setBirthDate(userPersonAddressDto.getBirthDate());
+        user.setPassword(userPersonAddressDto.getPassword()); }
+
+    //Converter dto person para entity person
+    public void copyPersonDtotoPerson(UserPersonAddressDto userPersonAddressDto, Person person) {
+        person.setDocument(userPersonAddressDto.getPerson().getDocument());
+        person.setType(userPersonAddressDto.getPerson().getType()); }
+
+    //Converte dto Address para entity address
+    public void copyAddressDtoToAddress(AddressDto addressDto, Address address) {
+        address.setRoad(addressDto.getRoad());
+        address.setNumber(addressDto.getNumber());
+        address.setNeighborhood(addressDto.getNeighborhood());
+        address.setComplement(addressDto.getComplement());
+        address.setCity(addressDto.getCity());
+        address.setZipCode(addressDto.getZipCode()); }
+}

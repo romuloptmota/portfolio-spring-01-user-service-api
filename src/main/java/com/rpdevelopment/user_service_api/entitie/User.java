@@ -1,7 +1,6 @@
 package com.rpdevelopment.user_service_api.entitie;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class User {
     private String password;
 
     //Atributos associados
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id")
     private Person person;
 
@@ -94,6 +93,10 @@ public class User {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public List<Address> getAddresses() {
+        return addresses;
     }
 
     //Equals|HashCode - id

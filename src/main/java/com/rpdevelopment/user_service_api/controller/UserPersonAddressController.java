@@ -1,6 +1,8 @@
 package com.rpdevelopment.user_service_api.controller;
 
 import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
+import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
+import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import com.rpdevelopment.user_service_api.service.UserPersonAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,21 @@ public class UserPersonAddressController {
         return ResponseEntity.ok(userDto);
     }
 
+    //QUERY USER DOCUMENT
+    @GetMapping(value = "/documents")
+    public ResponseEntity<Page<UserDocumentProjection>> searchUserDocument(Pageable pageable) {
+        Page<UserDocumentProjection> usersDocummentProjection = userPersonAddressService.searchUserDocument(pageable);
+        return ResponseEntity.ok(usersDocummentProjection);
+    }
+
+
+    //QUERY USER ADDRESS
+    @GetMapping(value = "/addresses")
+    public ResponseEntity<Page<UserAddressProjection>> searchUserAddress(Pageable pageable) {
+        Page<UserAddressProjection> userAddressProjections = userPersonAddressService.searchUserAddress(pageable);
+        return ResponseEntity.ok(userAddressProjections);
+    }
+
     //POST
     @PostMapping
     public ResponseEntity<UserPersonAddressDto> save(@RequestBody UserPersonAddressDto userDto) {
@@ -55,5 +72,6 @@ public class UserPersonAddressController {
         userPersonAddressService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
 
 }

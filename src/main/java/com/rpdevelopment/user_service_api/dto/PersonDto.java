@@ -1,8 +1,8 @@
 package com.rpdevelopment.user_service_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.rpdevelopment.user_service_api.entitie.Person;
-import com.rpdevelopment.user_service_api.entitie.Type;
+import com.rpdevelopment.user_service_api.entities.Person;
+import com.rpdevelopment.user_service_api.entities.Type;
 
 @JsonPropertyOrder({ "id", "document", "type"})
 public class PersonDto {

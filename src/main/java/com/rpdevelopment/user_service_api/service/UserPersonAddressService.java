@@ -2,10 +2,12 @@ package com.rpdevelopment.user_service_api.service;
 
 import com.rpdevelopment.user_service_api.dto.AddressDto;
 import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
-import com.rpdevelopment.user_service_api.entitie.Address;
-import com.rpdevelopment.user_service_api.entitie.Person;
-import com.rpdevelopment.user_service_api.entitie.User;
+import com.rpdevelopment.user_service_api.entities.Address;
+import com.rpdevelopment.user_service_api.entities.Person;
+import com.rpdevelopment.user_service_api.entities.User;
 import com.rpdevelopment.user_service_api.exceptions.ResourceNotFoundException;
+import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
+import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import com.rpdevelopment.user_service_api.repository.AddressRepository;
 import com.rpdevelopment.user_service_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,20 @@ public class UserPersonAddressService {
         User user = userRepository.findById(id).orElseThrow(
                 ()-> new ResourceNotFoundException("Not Found"));
         return new UserPersonAddressDto(user);
+    }
+
+    //QUERY USER DOCUMENT
+    @Transactional(readOnly = true)
+    public Page<UserDocumentProjection> searchUserDocument(Pageable pageable) {
+        Page<UserDocumentProjection> userDocument = userRepository.searchUserDocument(pageable);
+        return userDocument;
+    }
+
+    //QUERY USER ADDRESS
+    @Transactional(readOnly = true)
+    public Page<UserAddressProjection> searchUserAddress(Pageable pageable) {
+        Page<UserAddressProjection> userAddress = userRepository.searchUserAddress(pageable);
+        return userAddress;
     }
 
     //SAVE
@@ -142,5 +158,7 @@ public class UserPersonAddressService {
         address.setNeighborhood(addressDto.getNeighborhood());
         address.setComplement(addressDto.getComplement());
         address.setCity(addressDto.getCity());
-        address.setZipCode(addressDto.getZipCode()); }
+        address.setZipCode(addressDto.getZipCode());
+    }
+
 }

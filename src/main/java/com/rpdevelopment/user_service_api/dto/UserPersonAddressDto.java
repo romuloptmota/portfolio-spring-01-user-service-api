@@ -1,8 +1,8 @@
 package com.rpdevelopment.user_service_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.rpdevelopment.user_service_api.entitie.Address;
-import com.rpdevelopment.user_service_api.entitie.User;
+import com.rpdevelopment.user_service_api.entities.Address;
+import com.rpdevelopment.user_service_api.entities.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

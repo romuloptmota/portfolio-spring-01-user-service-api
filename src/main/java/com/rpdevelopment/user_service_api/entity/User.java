@@ -1,4 +1,4 @@
-package com.rpdevelopment.user_service_api.entities;
+package com.rpdevelopment.user_service_api.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -15,6 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String email;
     private LocalDate birthDate;
     private String password;

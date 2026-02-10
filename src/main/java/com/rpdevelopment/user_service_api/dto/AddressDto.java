@@ -1,19 +1,26 @@
 package com.rpdevelopment.user_service_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.rpdevelopment.user_service_api.entities.Address;
-import com.rpdevelopment.user_service_api.entities.User;
+import com.rpdevelopment.user_service_api.entity.Address;
+import com.rpdevelopment.user_service_api.entity.User;
+import jakarta.validation.constraints.NotBlank;
 
 @JsonPropertyOrder({ "id", "road", "number", "neighborhood", "complement", "city", "zipCode"})
 public class AddressDto {
 
     //Atributos
     private Long id;
+    @NotBlank(message = "Campo rua requerido")
     private String road;
+    @NotBlank(message = "Campo numero requerido")
     private String number;
+    @NotBlank(message = "Campo bairro requerido")
     private String neighborhood;
+    @NotBlank(message = "Campo complemento requerido")
     private String complement;
+    @NotBlank(message = "Campo cidade requerido")
     private String city;
+    @NotBlank(message = "Campo cep requerido")
     private String zipCode;
 
     //Construtores

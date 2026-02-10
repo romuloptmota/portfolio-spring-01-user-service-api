@@ -1,4 +1,4 @@
-package com.rpdevelopment.user_service_api.entities;
+package com.rpdevelopment.user_service_api.entity;
 
 
 public enum Type {

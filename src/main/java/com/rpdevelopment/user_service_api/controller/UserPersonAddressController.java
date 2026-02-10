@@ -4,6 +4,7 @@ import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
 import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
 import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import com.rpdevelopment.user_service_api.service.UserPersonAddressService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,7 +54,7 @@ public class UserPersonAddressController {
 
     //POST
     @PostMapping
-    public ResponseEntity<UserPersonAddressDto> save(@RequestBody UserPersonAddressDto userDto) {
+    public ResponseEntity<UserPersonAddressDto> save(@RequestBody @Valid UserPersonAddressDto userDto) {
         UserPersonAddressDto userDtoSaved = userPersonAddressService.save(userDto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(userDtoSaved.getId()).toUri();
         return ResponseEntity.created(uri).body(userDtoSaved);
@@ -61,7 +62,7 @@ public class UserPersonAddressController {
 
     //PUT
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserPersonAddressDto> update(@RequestBody UserPersonAddressDto userDto, @PathVariable Long id) {
+    public ResponseEntity<UserPersonAddressDto> update(@RequestBody @Valid UserPersonAddressDto userDto, @PathVariable Long id) {
         UserPersonAddressDto userDtoUpdated = userPersonAddressService.update(userDto, id);
         return ResponseEntity.ok(userDtoUpdated);
     }

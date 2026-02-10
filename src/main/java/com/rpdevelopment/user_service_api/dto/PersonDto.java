@@ -1,17 +1,21 @@
 package com.rpdevelopment.user_service_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.rpdevelopment.user_service_api.entities.Person;
-import com.rpdevelopment.user_service_api.entities.Type;
+import com.rpdevelopment.user_service_api.entity.Person;
+import com.rpdevelopment.user_service_api.entity.Type;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @JsonPropertyOrder({ "id", "document", "type"})
 public class PersonDto {
 
     //Atributos
     private Long id;
+    @NotBlank(message = "Campo documento requerido.")
     private String document;
 
     //Atributos associados
+    @NotNull(message = "Requerido tipo de documento PF ou PJ.")
     private Type type;
 
     //Construtores

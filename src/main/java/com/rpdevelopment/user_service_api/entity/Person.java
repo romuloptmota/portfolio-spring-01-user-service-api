@@ -1,4 +1,4 @@
-package com.rpdevelopment.user_service_api.entities;
+package com.rpdevelopment.user_service_api.entity;
 
 import jakarta.persistence.*;
 
@@ -12,6 +12,7 @@ public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     private String document;
 
     //Atributos Associados

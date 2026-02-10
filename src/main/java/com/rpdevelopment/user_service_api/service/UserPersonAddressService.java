@@ -2,10 +2,10 @@ package com.rpdevelopment.user_service_api.service;
 
 import com.rpdevelopment.user_service_api.dto.AddressDto;
 import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
-import com.rpdevelopment.user_service_api.entities.Address;
-import com.rpdevelopment.user_service_api.entities.Person;
-import com.rpdevelopment.user_service_api.entities.User;
-import com.rpdevelopment.user_service_api.exceptions.ResourceNotFoundException;
+import com.rpdevelopment.user_service_api.entity.Address;
+import com.rpdevelopment.user_service_api.entity.Person;
+import com.rpdevelopment.user_service_api.entity.User;
+import com.rpdevelopment.user_service_api.exception.ResourceNotFoundException;
 import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
 import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import com.rpdevelopment.user_service_api.repository.AddressRepository;

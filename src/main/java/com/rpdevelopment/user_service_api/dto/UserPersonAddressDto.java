@@ -1,8 +1,12 @@
 package com.rpdevelopment.user_service_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.rpdevelopment.user_service_api.entities.Address;
-import com.rpdevelopment.user_service_api.entities.User;
+import com.rpdevelopment.user_service_api.entity.Address;
+import com.rpdevelopment.user_service_api.entity.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,9 +17,16 @@ public class UserPersonAddressDto {
 
     //Atributos
     private Long id;
+    @NotBlank(message = "Campo nome requerido")
+    @Size(min = 6, max = 50, message ="Requerido 6 a 50 caracteres")
     private String name;
+    @NotBlank(message = "Campo e-mail requerido")
+    @Email(message = "E-mail invalido")
     private String email;
+    @NotNull(message = "Campo nascimento obrigatório")
     private LocalDate birthDate;
+    @NotBlank(message = "Campo senha requerido")
+    @Size(min = 6, max = 12, message = "Requerido de 6 a 12 caracteres.")
     private String password;
 
     //Atributos associados
@@ -52,7 +63,7 @@ public class UserPersonAddressDto {
 
     //Métodos
     public void addAddresses(List<AddressDto> addresses) {
-        addresses.addAll(this.addresses);
+        this.addresses.addAll(addresses);
     }
 
     //Getter

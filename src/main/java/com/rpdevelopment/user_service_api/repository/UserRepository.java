@@ -1,6 +1,6 @@
 package com.rpdevelopment.user_service_api.repository;
 
-import com.rpdevelopment.user_service_api.entities.User;
+import com.rpdevelopment.user_service_api.entity.User;
 import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
 import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import org.springframework.data.domain.Page;

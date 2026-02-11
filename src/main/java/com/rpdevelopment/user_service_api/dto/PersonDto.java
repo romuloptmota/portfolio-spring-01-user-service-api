@@ -3,6 +3,7 @@ package com.rpdevelopment.user_service_api.dto;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.rpdevelopment.user_service_api.entity.Person;
 import com.rpdevelopment.user_service_api.entity.Type;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

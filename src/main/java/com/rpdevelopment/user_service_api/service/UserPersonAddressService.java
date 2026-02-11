@@ -5,10 +5,12 @@ import com.rpdevelopment.user_service_api.dto.UserPersonAddressDto;
 import com.rpdevelopment.user_service_api.entity.Address;
 import com.rpdevelopment.user_service_api.entity.Person;
 import com.rpdevelopment.user_service_api.entity.User;
+import com.rpdevelopment.user_service_api.exception.DuplicateResourceException;
 import com.rpdevelopment.user_service_api.exception.ResourceNotFoundException;
 import com.rpdevelopment.user_service_api.projection.UserAddressProjection;
 import com.rpdevelopment.user_service_api.projection.UserDocumentProjection;
 import com.rpdevelopment.user_service_api.repository.AddressRepository;
+import com.rpdevelopment.user_service_api.repository.PersonRepository;
 import com.rpdevelopment.user_service_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,8 @@ public class UserPersonAddressService {
     private UserRepository userRepository;
     @Autowired
     private AddressRepository addressRepository;
+    @Autowired
+    private PersonRepository personRepository;
 
     //CRUD PADRÃO
     // FIND ALL
@@ -37,7 +41,7 @@ public class UserPersonAddressService {
     @Transactional(readOnly = true)
     public UserPersonAddressDto usersFindById (Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Not Found"));
+                ()-> new ResourceNotFoundException("Id Not Found"));
         return new UserPersonAddressDto(user);
     }
 
@@ -60,9 +64,15 @@ public class UserPersonAddressService {
     public UserPersonAddressDto save (UserPersonAddressDto userPersonAddressDto) {
 
         User user = new User();
+        if (userRepository.existsByEmail(userPersonAddressDto.getEmail())) {
+            throw new DuplicateResourceException("Email already exists");
+        }
         copyUserDtoToUser(userPersonAddressDto, user);
 
         Person person = new Person();
+        if (personRepository.existsByDocument(userPersonAddressDto.getPerson().getDocument())){
+            throw new DuplicateResourceException("Document already exists");
+        }
         copyPersonDtotoPerson(userPersonAddressDto, person);
         user.setPerson(person);
 
@@ -82,12 +92,19 @@ public class UserPersonAddressService {
     public UserPersonAddressDto update(UserPersonAddressDto userPersonAddressDto, Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Id Not Found"));
+
+        if (userRepository.existsByEmailAndIdNot(userPersonAddressDto.getEmail(), id)) {
+            throw new DuplicateResourceException("Email already exists");
+        }
         copyUserDtoToUser(userPersonAddressDto, user);
 
         Person person = user.getPerson();
         if (person == null) {
             person = new Person();
+        }
+        if (personRepository.existsByDocumentAndIdNot(userPersonAddressDto.getPerson().getDocument(), id)){
+            throw new DuplicateResourceException("Document already exists");
         }
         copyPersonDtotoPerson(userPersonAddressDto, person);
         user.setPerson(person);
@@ -133,7 +150,7 @@ public class UserPersonAddressService {
     public void delete (Long id) {
 
         User user = userRepository.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Not Found"));
+                ()-> new ResourceNotFoundException("Id Not Found"));
         userRepository.delete(user);
 
     }

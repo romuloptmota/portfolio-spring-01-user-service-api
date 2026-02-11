@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -30,4 +32,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "FROM TB_USER " +
             "INNER JOIN TB_ADDRESS ON TB_ADDRESS.USER_ID = TB_USER.ID")
     Page<UserAddressProjection> searchUserAddress(Pageable pageable);
+
+
+    //EMAIL EXIST
+    boolean existsByEmail(String email);
+
+    //EMAIL EXIST - ID NOT
+    boolean existsByEmailAndIdNot(String email, Long id);
+
 }

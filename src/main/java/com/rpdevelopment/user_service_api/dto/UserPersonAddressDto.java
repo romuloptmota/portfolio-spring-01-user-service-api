@@ -3,6 +3,7 @@ package com.rpdevelopment.user_service_api.dto;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.rpdevelopment.user_service_api.entity.Address;
 import com.rpdevelopment.user_service_api.entity.User;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +31,10 @@ public class UserPersonAddressDto {
     private String password;
 
     //Atributos associados
+    @Valid
     private PersonDto person;
+
+    @Valid
     private List<AddressDto> addresses = new ArrayList<AddressDto>();
 
     //Construtores

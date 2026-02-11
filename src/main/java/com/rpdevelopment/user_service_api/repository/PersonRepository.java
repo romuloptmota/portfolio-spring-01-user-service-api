@@ -6,4 +6,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
+
+    //DOCUMENT EXIST
+    boolean existsByDocument(String document);
+
+    //DOCUMENT EXIST - ID NOT
+    boolean existsByDocumentAndIdNot(String email, Long id);
 }

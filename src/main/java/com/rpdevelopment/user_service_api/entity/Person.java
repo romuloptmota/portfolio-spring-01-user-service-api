@@ -33,6 +33,12 @@ public class Person {
         this.user = user;
     }
 
+    public Person(Long id, String document, Type type) {
+        this.id = id;
+        this.document = document;
+        this.type = type;
+    }
+
     public Person(Person entity) {
         this.id = entity.getId();
         this.document = entity.getDocument();

@@ -37,6 +37,16 @@ public class Address {
         this.user = user;
     }
 
+    public Address(Long id, String road, String number, String neighborhood, String complement, String city, String zipCode) {
+        this.id = id;
+        this.road = road;
+        this.number = number;
+        this.neighborhood = neighborhood;
+        this.complement = complement;
+        this.city = city;
+        this.zipCode = zipCode;
+    }
+
     //Getter|Setter
     public Long getId() {
         return id;

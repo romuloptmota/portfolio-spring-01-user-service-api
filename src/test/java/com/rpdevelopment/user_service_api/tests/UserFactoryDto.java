@@ -5,11 +5,11 @@ import com.rpdevelopment.user_service_api.entity.User;
 
 import static com.rpdevelopment.user_service_api.tests.UserFactory.createUser;
 
+
 public class UserFactoryDto {
 
     public static UserPersonAddressDto createUserFactoryDto(){
         User user = createUser();
         return new UserPersonAddressDto(user);
     }
-
 }

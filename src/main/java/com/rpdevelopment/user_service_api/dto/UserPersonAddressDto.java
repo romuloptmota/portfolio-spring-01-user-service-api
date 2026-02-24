@@ -31,6 +31,7 @@ public class UserPersonAddressDto {
     private String password;
 
     //Atributos associados
+    @NotNull
     @Valid
     private PersonDto person;
 

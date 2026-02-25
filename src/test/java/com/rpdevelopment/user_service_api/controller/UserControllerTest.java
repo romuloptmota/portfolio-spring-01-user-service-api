@@ -16,10 +16,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserPersonAddressController.class)
@@ -31,9 +30,9 @@ public class UserControllerTest {
 
     //DEPENDENTES
     @MockBean
-    private UserPersonAddressService userPersonAddressService;
+    private UserPersonAddressService service;
 
-    private UserPersonAddressDto userPersonAddressDto;
+    private UserPersonAddressDto dto;
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +44,7 @@ public class UserControllerTest {
     void setUp() throws Exception {
         existingId = 1L;
         nonExistingId = 1000L;
-        userPersonAddressDto = UserFactoryDto.createUserFactoryDto();
+        dto = UserFactoryDto.createUserFactoryDto();
     }
 
     //GET ID EXISTENTE
@@ -53,7 +52,7 @@ public class UserControllerTest {
     public void findByIdShouldReturnUserWhenIdExists() throws Exception {
 
         //CHAMADA E RETORNO DO METODO
-        Mockito.when(userPersonAddressService.usersFindById(existingId)).thenReturn(userPersonAddressDto);
+        Mockito.when(service.usersFindById(existingId)).thenReturn(dto);
 
         //FIND ID - CHAMADA DO ENDPOINT
         ResultActions resultActions =
@@ -75,7 +74,7 @@ public class UserControllerTest {
     public void findByIdShouldResourceNotFoundExceptionWhenIdNonExistis() throws Exception {
 
         //CHAMADA E RETORNO DO METODO
-        Mockito.when(userPersonAddressService.usersFindById(nonExistingId))
+        Mockito.when(service.usersFindById(nonExistingId))
                 .thenThrow(new ResourceNotFoundException("User not found"));
 
         //FIND ID - CHAMADA DO ENDPOINT
@@ -95,11 +94,11 @@ public class UserControllerTest {
     public void createShouldReturn201AndUserDto() throws Exception {
 
         //CHAMADA E RETORNO DO METODO
-        Mockito.when(userPersonAddressService.save(Mockito.any(UserPersonAddressDto.class)))
-                .thenReturn(userPersonAddressDto);
+        Mockito.when(service.save(Mockito.any(UserPersonAddressDto.class)))
+                .thenReturn(dto);
 
         //CORPO DA REQUISIÇÃO
-        String jsonBody = objectMapper.writeValueAsString(userPersonAddressDto);
+        String jsonBody = objectMapper.writeValueAsString(dto);
 
         //POST
         ResultActions resultActions = mockMvc.perform(post("/users")
@@ -122,11 +121,11 @@ public class UserControllerTest {
     public void createShouldReturn409WhenEmailAlreadyExists() throws Exception {
 
         //CHAMADA E RETORNO DO METODO
-        Mockito.when(userPersonAddressService.save(Mockito.any(UserPersonAddressDto.class)))
+        Mockito.when(service.save(Mockito.any(UserPersonAddressDto.class)))
                 .thenThrow(new DuplicateResourceException("Email already exists"));
 
         //CORPO DA REQUISIÇÃO
-        String jsonBody = objectMapper.writeValueAsString(userPersonAddressDto);
+        String jsonBody = objectMapper.writeValueAsString(dto);
 
         //POST
         ResultActions resultActions = mockMvc.perform(post("/users")
@@ -157,7 +156,6 @@ public class UserControllerTest {
                 null
         );
 
-
         //CORPO DA REQUISIÇÃO
         String jsonBody = objectMapper.writeValueAsString(invalidDto);
 
@@ -173,6 +171,130 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.error").exists());
 
         //VERIFICAÇÃO - service não chamado
-        Mockito.verify(userPersonAddressService, Mockito.never()).save(Mockito.any());
+        Mockito.verify(service, Mockito.never()).save(Mockito.any());
     }
+
+    //UPDATE ID EXISTENTE
+    @Test
+    public void updateShouldReturn200AndUpdatedUserWhenIdExists() throws Exception {
+
+        //PREPARANDO
+        Mockito.when(service.update(Mockito
+                .any(UserPersonAddressDto.class), eq(existingId)))
+                .thenReturn(dto);
+
+        //CORPO DA REQUISIÇÃO - CONVERTE JAVA PARA JSON
+        String jsonBody = objectMapper.writeValueAsString(dto);
+
+        //UPDATE - CHAMADA
+        // content(corpo da requisição) | contentType(formato corpo da requisição) | accept(formato da resposta)
+        ResultActions resultActions =
+                mockMvc.perform(put("/users/{id}", existingId)
+                        .content(jsonBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        //VALIDAÇÃO
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(existingId))
+                .andExpect(jsonPath("$.name").value("Novo Usuario"))
+                .andExpect(jsonPath("$.email").value("usuario@gmail.com"))
+                .andExpect(jsonPath("$.person.document").value("507.332.198-64"))
+                .andExpect(jsonPath("$.addresses[1].road").value("Rua A"));
+    }
+
+    //UPDATE ID NÃO EXISTENTE
+    @Test
+    public void updateShouldReturn404WhenIdDoesNotExist() throws Exception {
+
+        //PREPARANDO
+        Mockito.when(service.update(Mockito
+                        .any(UserPersonAddressDto.class), eq(nonExistingId)))
+                .thenThrow(new ResourceNotFoundException("User not found"));
+
+        //CORPO DA REQUISIÇÃO - CONVERTE JAVA PARA JSON
+        String jsonBody = objectMapper.writeValueAsString(dto);
+
+        //UPDATE - CHAMADA
+        // content(corpo da requisição) | contentType(formato corpo da requisição) | accept(formato da resposta)
+        ResultActions resultActions =
+                mockMvc.perform(put("/users/{id}", nonExistingId)
+                        .content(jsonBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        //VALIDAÇÃO
+        //RESPOSTA ESPERADA
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("User not found"))
+                .andExpect(jsonPath("$.path").value("/users/" + nonExistingId));
+
+        //VERIFICA SERVICE CHAMOU O ID CORRETO E EXCEÇÃO VEIO DO SERVICE
+        Mockito.verify(service)
+                .update(Mockito.any(UserPersonAddressDto.class), eq(nonExistingId));
+    }
+
+    //UPDATE EMAIL DUPLICADO
+    @Test
+    public void updateShouldReturn409WhenEmailAlreadyExists() throws Exception{
+
+        //CHAMADA E RETORNO DO METODO
+        Mockito.when(service.update(Mockito
+                .any(UserPersonAddressDto.class), eq(existingId)))
+                .thenThrow(new DuplicateResourceException("Email already exists"));
+
+        //CORPO DA REQUISIÇÃO - converter java para json
+        String jsonBody = objectMapper.writeValueAsString(dto);
+
+        //PUT
+        ResultActions resultActions = mockMvc.perform(put("/users/{id}", existingId)
+                .content(jsonBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        //RESPOSTA ESPERADA
+        resultActions.andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Email already exists"))
+                .andExpect(jsonPath("$.path").value("/users/" + existingId));
+
+        //VERIFICA SE CHAMOU O SERVICE, E VEIO DA CAMADA DE NEGOCIO
+        Mockito.verify(service)
+                .update(Mockito.any(UserPersonAddressDto.class), eq(existingId));
+    }
+
+    //UPDATE VALIDAÇÃO
+    @Test
+    public void updateShouldReturn422WhenValidationFails() throws Exception {
+
+        // DTO INVALIDO (ex: nome vazio se tiver @NotBlank)
+        UserPersonAddressDto invalidDto = new UserPersonAddressDto(
+                existingId,
+                "",          // inválido @NotBlank
+                "email-invalido",  // inválido @Email
+                null,              // inválido @NotNull
+                "123",             // inválido @Size
+                null,
+                null
+        );
+
+        //CORPO DA REQUISIÇÃO - converter java para json
+        String jsonBody = objectMapper.writeValueAsString(invalidDto);
+
+        //PUT
+        ResultActions resultActions = mockMvc.perform(put("/users/{id}", existingId)
+                .content(jsonBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        //RESPOSTA ESPERADA
+        resultActions.andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.errors").isArray());;
+
+        Mockito.verify(service, Mockito.never())
+                .update(Mockito.any(UserPersonAddressDto.class), Mockito.any());
+    }
+
 }

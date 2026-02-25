@@ -13,20 +13,23 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserPersonAddressController.class)
-public class UserControllerTest {
+public class UserPersonAddressControllerTest {
 
-    //IDS
     private Long existingId;
     private Long nonExistingId;
+    private PageImpl<UserPersonAddressDto> pageDto;
 
     //DEPENDENTES
     @MockBean
@@ -45,8 +48,10 @@ public class UserControllerTest {
         existingId = 1L;
         nonExistingId = 1000L;
         dto = UserFactoryDto.createUserFactoryDto();
+        pageDto = new PageImpl<>(List.of(dto));
     }
 
+    // ================= GET =================
     //GET ID EXISTENTE
     @Test
     public void findByIdShouldReturnUserWhenIdExists() throws Exception {
@@ -71,7 +76,7 @@ public class UserControllerTest {
 
     //GET ID NÃO EXISTENTE
     @Test
-    public void findByIdShouldResourceNotFoundExceptionWhenIdNonExistis() throws Exception {
+    public void findByIdShouldReturn404WhenIdDoesNotExist() throws Exception {
 
         //CHAMADA E RETORNO DO METODO
         Mockito.when(service.usersFindById(nonExistingId))
@@ -89,7 +94,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.path").value("/users/" + nonExistingId));
     }
 
-    //CREATE
+    // ================= CREATE =================
     @Test
     public void createShouldReturn201AndUserDto() throws Exception {
 
@@ -137,7 +142,7 @@ public class UserControllerTest {
         resultActions.andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("Email already exists"))
-                .andExpect(jsonPath("$.path").value("/users"));;
+                .andExpect(jsonPath("$.path").value("/users"));
 
     }
 
@@ -174,6 +179,7 @@ public class UserControllerTest {
         Mockito.verify(service, Mockito.never()).save(Mockito.any());
     }
 
+    // ================= UPDATE =================
     //UPDATE ID EXISTENTE
     @Test
     public void updateShouldReturn200AndUpdatedUserWhenIdExists() throws Exception {
@@ -297,4 +303,69 @@ public class UserControllerTest {
                 .update(Mockito.any(UserPersonAddressDto.class), Mockito.any());
     }
 
+    // ================= DELETE =================
+    //DELETE ID EXISTENTE
+    @Test
+    public void deleteShouldReturn204WhenIdExists() throws Exception {
+        //PREPARANDO
+        Mockito.doNothing().when(service).delete(existingId);
+
+        //AÇÃO
+        ResultActions resultActions =
+                mockMvc.perform(delete("/users/{id}", existingId)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        //ASSERTIONS - VALIDAÇÃO
+        resultActions.andExpect(status().isNoContent());
+
+        Mockito.verify(service).delete(existingId);
+    }
+
+    //DELETE ID NÃO EXISTENTE
+    @Test
+    public void deleteShouldReturn404WhenIdDoesNotExist() throws Exception {
+
+        //PREPARANDO
+        Mockito.doThrow(new ResourceNotFoundException("User not found"))
+                .when(service).delete(nonExistingId);
+
+        //AÇÃO
+        ResultActions resultActions =
+                mockMvc.perform(delete("/users/{id}", nonExistingId)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        //VALIDAÇÃO
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").exists());
+
+        Mockito.verify(service).delete(nonExistingId);
+    }
+
+    // ================= PAGINAÇÃO =================
+    //PAGINAÇÃO
+    @Test
+    public void findAllShouldReturnPagedUsers() throws Exception {
+
+        //PREPARANDO
+        Mockito.when(service.usersFindAll(Mockito.any()))
+                .thenReturn(pageDto);
+
+        //AÇÃO
+        ResultActions resultActions =
+                mockMvc.perform(get("/users")
+                        .param("page", "0")
+                        .param("size", "1")
+                        .accept(MediaType.APPLICATION_JSON));
+
+        //VALIDAÇÃO
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").exists())
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(1));
+
+        //VERIFICAÇÃO CHAMADA NO SERVICE
+        Mockito.verify(service).usersFindAll(Mockito.any());
+    }
 }
